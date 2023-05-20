@@ -65,8 +65,8 @@ def inclusive_range(a: int, b: int) -> range:
     return range(a, b + 1)
 
 
-def compute_forward(states: ndarray, observations: list[int | None], transitions: ndarray,
-                    emissions: ndarray[float]) -> float:
+def compute_forward(states: ndarray, observations: list[int | None], a_transitions: ndarray,
+                    b_emissions: ndarray[float]) -> float:
     # number of states - subtract two because "initial" and "final" doesn't count.
     big_n = len(states) - 2
 
@@ -82,31 +82,25 @@ def compute_forward(states: ndarray, observations: list[int | None], transitions
     # for i, state in enumerate(states):
     #     forward[i][1] = transitions[i][0] * emissions[i][observations[1]]  # a_0,s * b_s(o_1)
 
+    # Initialization step
     for s in inclusive_range(1, big_n):
-        forward[s][1] = transitions[0][s] * emissions[s][observations[1]]  # a_0,s * b_s(o_1)
+        forward[s][1] = a_transitions[0][s] * b_emissions[s][observations[1]]  # a_0,s * b_s(o_1)
 
+    # Recursion step
     for t in inclusive_range(2, big_t):
         for s in inclusive_range(1, big_n):
-            forward[s][t] = sum_forwards(big_n, forward, t - 1, transitions, s, emissions[s][observations[t]])
+            # Here we use list comprehensions to generate the list which we will sum over
+            forward[s][t] = sum(
+                [forward[s_prime][t - 1] * a_transitions[s_prime][s] * b_emissions[s][observations[t]]
+                 for s_prime in inclusive_range(1, big_n)])
 
-    # For the sum in the termination step is mostly the same, however we dont multiply with emissions,
-    # therefore it is set to 1.
-    # In addition, the transition indexes are s,qf, as opposed to s_prime,s as it is above,
-    # therefore the slightly funky parameters inputted below.
-    forward[qf][big_t] = sum_forwards(big_n, forward, big_t, transitions, s=qf, emission=1)
+    # Termination step
+    forward[qf][big_t] = sum([forward[s][big_t] * a_transitions[s][qf] for s in inclusive_range(1, big_n)])
 
     if forward[qf][big_t] > 1 or forward[qf][big_t] < 0:
         raise Exception(f"The computed probability: {forward[qf][big_t]} is not a valid probability")
 
     return forward[qf, big_t]
-
-
-def sum_forwards(big_n: int, forward: ndarray, t_val: int, a_transitions: ndarray, s: int, emission: any):
-    out = 0
-    for s_prime in range(1, big_n):
-        out += forward[s_prime][t_val] * a_transitions[s_prime][s] * emission
-
-    return out
 
 
 def compute_viterbi(states: ndarray, observations: list[int | None], a_transitions: ndarray, b_emissions: ndarray):
