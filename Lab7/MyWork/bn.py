@@ -408,6 +408,7 @@ def tire():
     }
     # High fuel consumption
     HC = {
+        # DT ,   FTL,     EM
         ('true', 'true', 'true'): (0.1, 0.9),
         ('true', 'true', 'false'): (0.2, 0.8),
         ('true', 'false', 'true'): (0.7, 0.3),
@@ -426,7 +427,7 @@ def tire():
     Fuel_leak = Variable('FTL', ('false', 'true'), FTL)
     Vibrations = Variable('V', ('false', 'true'), V, [Damaged_tire])
     Slow_max_speed = Variable('SMS', ('false', 'true'), SMS, [Damaged_tire, Electronic_malfunction])
-    High_consumption = Variable('HC', ('false', 'true'), HC, [Damaged_tire, Electronic_malfunction, Fuel_leak])
+    High_consumption = Variable('HC', ('false', 'true'), HC, [Damaged_tire, Fuel_leak, Electronic_malfunction])
 
     variables = [Damaged_tire, Electronic_malfunction, Fuel_leak, Vibrations, Slow_max_speed, High_consumption]
 
