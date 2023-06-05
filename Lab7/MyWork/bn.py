@@ -460,6 +460,10 @@ def tire():
         'HC': 'false'  # Your car does not consume more than usual.
     }
 
+    # conditionals_evidents = {
+    #     'HC': 'true'  # Your car does not consume more than usual.
+    # }
+
     print_conditional_probability(network, {'DT': 'true', }, conditionals_evidents)
     print_conditional_probability(network, {'EM': 'true', }, conditionals_evidents)
     print_conditional_probability(network, {'FTL': 'true', }, conditionals_evidents)
