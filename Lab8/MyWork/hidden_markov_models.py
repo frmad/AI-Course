@@ -17,10 +17,13 @@ def main():
     states = np.array(["initial", "hot", "cold", "final"])
 
     # To simulate starting from index 1, we add a dummy value at index 0
+    # observation_sets = [
+    #     [None, 3, 1, 3],
+    #     [None, 3, 3, 1, 1, 2, 2, 3, 1, 3],
+    #     [None, 3, 3, 1, 1, 2, 3, 3, 1, 2],
+    # ]
     observation_sets = [
-        [None, 3, 1, 3],
-        [None, 3, 3, 1, 1, 2, 2, 3, 1, 3],
-        [None, 3, 3, 1, 1, 2, 3, 3, 1, 2],
+        [None, 1, 2, 3, 2, 2, 1],
     ]
 
     # Markov transition matrix
@@ -29,19 +32,20 @@ def main():
     # index 0 = start
     # index 1 = hot
     # index 2 = cold
-    # index 3 = end
+    # index 3 = end      to:  S   h   c   e     from:
     transitions = np.array([[.0, .8, .2, .0],  # Initial state
-                            [.0, .6, .3, .1],  # Hot state
-                            [.0, .4, .5, .1],  # Cold state
+                            [.0, .2, .6, .2],  # Hot state
+                            [.0, .3, .5, .2],  # Cold state
                             [.0, .0, .0, .0],  # Final state
                             ])
 
     # P(v|q)
     # emission[state][observation]
     # probality_of_this_amount_of_icecreams_given_weather = emission[state (weather)][observation (number of icecreams)]
+    #                      0    1   2   3
     emissions = np.array([[.0, .0, .0, .0],  # Initial state
-                          [.0, .2, .4, .4],  # Hot state
-                          [.0, .5, .4, .1],  # Cold state
+                          [.0, .1, .15, .75],  # Hot state
+                          [.0, .8, .1, .1],  # Cold state
                           [.0, .0, .0, .0],  # Final state
                           ])
 
@@ -147,8 +151,9 @@ def compute_viterbi(states: ndarray, observations: list[int | None], a_transitio
     path = []
     q = backpointers[qf][big_t]
     path.append(q)
-    # regular range here, since we have already added the final state
-    for t in reversed(range(1, big_t)):
+    # ALthough the final state has already been added,
+    # we still need to follow its backpointer to see what state resulted in the final state
+    for t in reversed(inclusive_range(1, big_t)):
         q = backpointers[q][t]
         path.append(q)
     return list(reversed(path))
